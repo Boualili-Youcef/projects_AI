@@ -35,6 +35,7 @@ class Noeud:
         self.proba = None
         self.hauteur = 0
 
+    # Prediciton
     def prediction(self, x):
         if self.proba is not None:
             
@@ -46,6 +47,7 @@ class Noeud:
                 return self.enfants["gauche"].prediction(x)            
             return self.enfants["droite"].prediction(x)
         
+    # Grow de l'arbre 
     def grow(self, data, profondeur=0):
         self.donnees = data
         entropie = self.entropie(data)
@@ -62,15 +64,14 @@ class Noeud:
             self.enfants["gauche"] = Noeud(self.profondeur_max)
             self.enfants["droite"] = Noeud(self.profondeur_max)
             profondeur += 1
-            
             self.enfants["gauche"].grow(d1, profondeur)
             self.enfants["droite"].grow(d2, profondeur)
         else:
             self.hauteur = profondeur
             self.proba = self.proba_empirique(data)
+            return 
 
-            
-            
+    # Calcule de la precision    
     def precision(self, data):
         correct_predictions = 0
         total_predictions = len(data)
@@ -86,6 +87,8 @@ class Noeud:
         
         return correct_predictions / total_predictions * 100 if total_predictions > 0 else 0
 
+
+    # Split en train test
     def split_train_test(self, data):
         np.random.shuffle(data)
         train_set_size = int(len(data) * 0.8)
@@ -93,6 +96,7 @@ class Noeud:
         test_set = data[train_set_size:]
         return train_set, test_set
         
+    # Calcul de la probabilité empirique
     def proba_empirique(self, d):
         size = len(d)
         classes = {}
@@ -103,9 +107,11 @@ class Noeud:
         result = {key : value/size for key, value in classes.items()}
         return result
     
+    # Vérification de la condition sur l'attribut
     def question_inf(self, x, a, s):
         return x[a] < s
-    
+        
+    # Séparation des données selon une question
     def split(self, d, question):
         a, s = question
         d1 = []
@@ -117,6 +123,7 @@ class Noeud:
                 d2.append(d[i])
         return d1, d2
     
+    # Liste des seuils possibles pour un attribut
     def list_separ_attributs(self, d, a):
         list_attributs = []
         size = len(d)
@@ -133,6 +140,7 @@ class Noeud:
         
         return result
         
+    # Liste de toutes les questions possibles pour l'ensemble des attributs
     def liste_questions(self, d):
         attributs = []
         for attribut in d[0].x:
@@ -144,6 +152,7 @@ class Noeud:
             questions.extend(self.list_separ_attributs(d, a))
         return questions
     
+    # Calcul de l'entropie
     def entropie(self, d):
         prob_empirique = self.proba_empirique(d)
         entropy = 0
@@ -152,6 +161,7 @@ class Noeud:
                 entropy -= proba * math.log2(proba)
         return entropy
 
+    # Meilleur question
     def best_split(self, d):
         best_question = None
         questions = self.liste_questions(d)
@@ -165,6 +175,7 @@ class Noeud:
 
         return best_question
 
+    # Calcule du gain d'entropie
     def gain_entropie(self, d, question):
         d1, d2 = self.split(d, question)
         if len(d1) == 0 or len(d2) == 0:
@@ -175,18 +186,15 @@ class Noeud:
 
         return self.entropie(d) - r1 * self.entropie(d1) - r2 * self.entropie(d2)
     
+    # Focntion d'elagage 
     def elagage(self, alpha):
-        # Vérifier si l'objet est une feuille
         if self.enfants:
-            # Appliquer l'élagage à chaque enfant récursivement
             for enfant in self.enfants.values():
                 enfant.elagage(alpha)
             
-            # Calcul du gain d'entropie
             gain = self.gain_entropie(self.donnees, self.question)
             
-            # Si le gain d'entropie est inférieur à alpha, couper l'enfant
             if gain < alpha:
-                self.enfants = {}  # Retirer les enfants
-                self.proba = self.proba_empirique(self.donnees)  # Ajouter la probabilité empirique à la feuille
-                self.question = None  # Pas de question à la feuille
+                self.enfants = {} 
+                self.proba = self.proba_empirique(self.donnees)
+                self.question = None 
