@@ -38,26 +38,5 @@ La classe `Noeud` est la brique de base de l'arbre de décision. Elle contient :
 ### Prédiction
 Pour prédire la classe d'une nouvelle instance, on parcourt l'arbre de décision en posant les questions successives jusqu'à atteindre une feuille. La classe prédite est celle associée à cette feuille.
 
-### Évaluation
-L'efficacité de l'arbre de décision peut être évaluée à l'aide de métriques telles que :
-* **Taux de bonne classification :** Proportion d'instances correctement classées.
-* **Matrice de confusion :** Tableau croisé permettant d'analyser les erreurs de classification.
-* **Courbe ROC :** Pour les problèmes de classification binaire, elle permet de visualiser le compromis entre le taux de vrais positifs et le taux de faux positifs.
-
-### Améliorations Possibles
-* **Gestion des données manquantes**
-* **Élagage de l'arbre**
-* **Méthodes de sélection d'attributs**
-* **Ensembles d'arbres**
-
-### Conclusion
-Les arbres de décision sont un outil puissant et intuitif pour la modélisation prédictive. Ce projet fournit une base solide pour explorer et approfondir cette technique.
-
-**Pour une documentation encore plus complète, vous pouvez ajouter des sections sur :**
-* **Les données utilisées**
-* **Les hyperparamètres**
-* **Les résultats expérimentaux**
-* **Le code source**
-
 **BOUALILI Youcef**
 **07/12/2024**
