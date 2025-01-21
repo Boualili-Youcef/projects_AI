@@ -365,9 +365,9 @@ def Question_9():
     total_temps_noir = []
     total_temps_blanc = []
 
-    for profondeur in range(1, 4):
+    for profondeur in range(1, 2):
         print(f"Profondeur {profondeur}:")
-        victoires_noir, victoires_blanc, scores_noir, scores_blanc, temps_noir, temps_blanc = simuler_parties(5, profondeur_noir=profondeur, profondeur_blanc=profondeur)
+        victoires_noir, victoires_blanc, scores_noir, scores_blanc, temps_noir, temps_blanc = simuler_parties(2, profondeur_noir=profondeur, profondeur_blanc=profondeur)
         
         print(f"Victoires Noir: {victoires_noir}, Victoires Blanc: {victoires_blanc}")
         print(f"Score moyen Noir: {np.mean(scores_noir)}, Score moyen Blanc: {np.mean(scores_blanc)}")
@@ -488,7 +488,6 @@ if __name__ == "__main__":
     #game = Jeu()
     #game.demarrer()
     comparer_alphabeta()
-
 
 
 
