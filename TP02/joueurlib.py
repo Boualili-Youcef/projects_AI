@@ -39,26 +39,26 @@ class Minmax(IA):
 	
 	def fct_evaluation(self, plateau, couleurval):
 		score = 0
-		stability_weight = 10
-		mobility_weight = 5
-		corner_weight = 20
+		poids_stabilite = 10
+		poids_mobilite = 5
+		poids_coin = 20
 
-		stable_discs = 0
+		disques_stables = 0
 		for i in range(plateau.taille):
 			for j in range(plateau.taille):
 				if plateau.tableau_cases[i][j] == couleurval:
-					stable_discs += 1
-		score += stability_weight * stable_discs
+					disques_stables += 1
+		score += poids_stabilite * disques_stables
 
-		mobility = len(plateau.liste_coups_valides(couleurval))
-		score += mobility_weight * mobility
+		mobilite = len(plateau.liste_coups_valides(couleurval))
+		score += poids_mobilite * mobilite
 
-		corners = [(0, 0), (0, plateau.taille - 1), (plateau.taille - 1, 0), (plateau.taille - 1, plateau.taille - 1)]
-		corner_control = 0
-		for corner in corners:
-			if plateau.tableau_cases[corner[0]][corner[1]] == couleurval:
-				corner_control += 1
-		score += corner_weight * corner_control
+		coins = [(0, 0), (0, plateau.taille - 1), (plateau.taille - 1, 0), (plateau.taille - 1, plateau.taille - 1)]
+		controle_coins = 0
+		for coin in coins:
+			if plateau.tableau_cases[coin[0]][coin[1]] == couleurval:
+				controle_coins += 1
+		score += poids_coin * controle_coins
 
 		return score
 
@@ -114,26 +114,26 @@ class AlphaBeta(IA):
 
 	def fct_evaluation(self, plateau, couleurval):
 		score = 0
-		stability_weight = 10
-		mobility_weight = 5
-		corner_weight = 20
+		poids_stabilite = 10
+		poids_mobilite = 5
+		poids_coin = 20
 
-		stable_discs = 0
+		disques_stables = 0
 		for i in range(plateau.taille):
 			for j in range(plateau.taille):
 				if plateau.tableau_cases[i][j] == couleurval:
-					stable_discs += 1
-		score += stability_weight * stable_discs
+					disques_stables += 1
+		score += poids_stabilite * disques_stables
 
-		mobility = len(plateau.liste_coups_valides(couleurval))
-		score += mobility_weight * mobility
+		mobilite = len(plateau.liste_coups_valides(couleurval))
+		score += poids_mobilite * mobilite
 
-		corners = [(0, 0), (0, plateau.taille - 1), (plateau.taille - 1, 0), (plateau.taille - 1, plateau.taille - 1)]
-		corner_control = 0
-		for corner in corners:
-			if plateau.tableau_cases[corner[0]][corner[1]] == couleurval:
-				corner_control += 1
-		score += corner_weight * corner_control
+		coins = [(0, 0), (0, plateau.taille - 1), (plateau.taille - 1, 0), (plateau.taille - 1, plateau.taille - 1)]
+		controle_coins = 0
+		for coin in coins:
+			if plateau.tableau_cases[coin[0]][coin[1]] == couleurval:
+				controle_coins += 1
+		score += poids_coin * controle_coins
 
 		return score
 
