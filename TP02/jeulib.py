@@ -4,6 +4,8 @@ import numpy as np
 
 import joueurlib
 import interfacelib
+import matplotlib.pyplot as plt
+from joueurlib import Minmax, AlphaBeta, Random
 
 
 class Jeu:
@@ -86,8 +88,6 @@ class Jeu:
 				self.gui.desactive_humain()
 				self.gui.desactive_ia()
 				self.gui.message_tour.set("Partie finie.\n"+m)
-			# Plot the global statistics
-			joueurlib.Minmax.plot_global_evolution()
 			self.joueur_courant = None
 				
 		else:
@@ -156,7 +156,11 @@ class Plateau:
 				return True
 		
 		return False #le coup ne capture pas
-
+	def copie_apres_jouer(self, coup, couleurval):
+			new_plateau = self.copie()
+			new_plateau.jouer(coup, couleurval)
+			return new_plateau
+    
 	def existe_coup_valide(self, couleurval):
 		for i in range(self.taille):
 			for j in range(self.taille):
@@ -200,21 +204,292 @@ class Plateau:
 		return copie
 			
 
-# 1. Commencez par jouer une partie contre vous mˆeme pour v´erifier que le jeu marche bien chez vous.
-# Pour cela il suffit de cr´eer une instance de la classe Jeu, et d’utiliser la m´ethode demarrer.
 
-partie = Jeu()
-partie.demarrer()
+"""
+8. Tracez une courbe montrant comment les deux compteurs varient en fonction du choix de la
+profondeur maximale.
+"""
+def test_profondeur():
+    profondeurs = range(1, 5) 
+    temps_execution_minmax = []
+    nb_appels_jouer_minmax = []
+    temps_execution_alphabeta = []
+    nb_appels_jouer_alphabeta = []
+
+    for profondeur in profondeurs:
+        # Initialiser une partie
+        game_minmax = Jeu(opts={"choix_joueurs": False})
+        game_alphabeta = Jeu(opts={"choix_joueurs": False})
+
+        # Partie entre Minmax et Random
+        joueur_noir_minmax = Minmax(game_minmax, "noir") 
+        joueur_blanc_minmax = Random(game_minmax, "blanc") 
+
+        # Meme chose pour AlphaBeta
+        joueur_noir_alphabeta = AlphaBeta(game_alphabeta, "noir")  
+        joueur_blanc_alphabeta = Random(game_alphabeta, "blanc") 
+
+        game_minmax.noir = joueur_noir_minmax
+        game_minmax.blanc = joueur_blanc_minmax
+        game_minmax.joueur_courant = joueur_noir_minmax 
+        game_minmax.partie_finie = False
+
+        # pour AlphaBeta
+        game_alphabeta.noir = joueur_noir_alphabeta
+        game_alphabeta.blanc = joueur_blanc_alphabeta
+        game_alphabeta.joueur_courant = joueur_noir_alphabeta  
+        game_alphabeta.partie_finie = False
+
+        while not game_minmax.partie_finie:
+            joueur = game_minmax.joueur_courant
+            if isinstance(joueur, Minmax):
+                coup = joueur.demande_coup(profondeur)
+            else:
+                coup = joueur.demande_coup()
+            game_minmax.jouer(coup) 
+
+        # pour AlphaBeta
+        while not game_alphabeta.partie_finie:
+            joueur = game_alphabeta.joueur_courant
+            if isinstance(joueur, AlphaBeta):
+                coup = joueur.demande_coup(profondeur) 
+            else:
+                coup = joueur.demande_coup()
+            game_alphabeta.jouer(coup)
+
+        # les compteurs Minmax
+        temps_execution_minmax.append(joueur_noir_minmax.temps_exe)
+        nb_appels_jouer_minmax.append(joueur_noir_minmax.nb_appels_jouer)
+
+        # les compteurs AlphaBeta
+        temps_execution_alphabeta.append(joueur_noir_alphabeta.temps_exe)
+        nb_appels_jouer_alphabeta.append(joueur_noir_alphabeta.nb_appels_jouer)
+
+        print(f"Profondeur {profondeur} (Minmax): Temps d'exécution = {joueur_noir_minmax.temps_exe:.2f} secondes, "
+              f"Nombre d'appels à jouer = {joueur_noir_minmax.nb_appels_jouer}")
+        print(f"Profondeur {profondeur} (AlphaBeta): Temps d'exécution = {joueur_noir_alphabeta.temps_exe:.2f} secondes, "
+              f"Nombre d'appels à jouer = {joueur_noir_alphabeta.nb_appels_jouer}")
+
+    # Les plotes 
+    plt.figure(figsize=(12, 12))
+
+    # Sous-graphe pour le temps d'exécution (Minmax)
+    plt.subplot(2, 2, 1)
+    plt.plot(profondeurs, temps_execution_minmax, marker='o', label='Temps d\'exécution (Minmax)')
+    plt.xlabel('Profondeur')
+    plt.ylabel('Temps d\'exécution (secondes)')
+    plt.title('Variation du Temps d\'Exécution en Fonction de la Profondeur (Minmax)')
+    plt.legend()
+    plt.grid(True)
+
+    # Sous-graphe pour le nombre d'appels à jouer (Minmax)
+    plt.subplot(2, 2, 2)
+    plt.plot(profondeurs, nb_appels_jouer_minmax, marker='o', color='orange', label='Nombre d\'appels à jouer (Minmax)')
+    plt.xlabel('Profondeur')
+    plt.ylabel('Nombre d\'appels à jouer')
+    plt.title('Variation du Nombre d\'Appels à Jouer en Fonction de la Profondeur (Minmax)')
+    plt.legend()
+    plt.grid(True)
+
+    # Sous-graphe pour le temps d'exécution (AlphaBeta)
+    plt.subplot(2, 2, 3)
+    plt.plot(profondeurs, temps_execution_alphabeta, marker='o', label='Temps d\'exécution (AlphaBeta)')
+    plt.xlabel('Profondeur')
+    plt.ylabel('Temps d\'exécution (secondes)')
+    plt.title('Variation du Temps d\'Exécution en Fonction de la Profondeur (AlphaBeta)')
+    plt.legend()
+    plt.grid(True)
+
+    # Sous-graphe pour le nombre d'appels à jouer (AlphaBeta)
+    plt.subplot(2, 2, 4)
+    plt.plot(profondeurs, nb_appels_jouer_alphabeta, marker='o', color='orange', label='Nombre d\'appels à jouer (AlphaBeta)')
+    plt.xlabel('Profondeur')
+    plt.ylabel('Nombre d\'appels à jouer')
+    plt.title('Variation du Nombre d\'Appels à Jouer en Fonction de la Profondeur (AlphaBeta)')
+    plt.legend()
+    plt.grid(True)
+
+    plt.tight_layout()
+    plt.show()
+
+
+""" 
+9. Ajoutez une fonction permettant de simuler n parties entre deux IA, et donnant le nombre de
+victoires, score moyen ainsi que le temps moyen de calcul pour chaque camp.
+"""
+def simuler_parties(n, profondeur_noir=3, profondeur_blanc=3):
+    victoires_noir = 0
+    victoires_blanc = 0
+    scores_noir = []
+    scores_blanc = []
+    temps_noir = []
+    temps_blanc = []
+
+    for i in range(n):
+        game = Jeu(opts={"choix_joueurs": False})
+
+        joueur_noir = Minmax(game, "noir")
+        joueur_blanc = Random(game, "blanc")
+
+        game.noir = joueur_noir
+        game.blanc = joueur_blanc
+        game.joueur_courant = joueur_noir
+        game.partie_finie = False
+
+        while not game.partie_finie:
+            joueur = game.joueur_courant
+            if isinstance(joueur, Minmax):
+                coup = joueur.demande_coup(profondeur_noir if joueur.couleur == "noir" else profondeur_blanc)
+            else:
+                coup = joueur.demande_coup()
+            game.jouer(coup)
+
+        [victoire, score_noir, score_blanc] = game.score()
+        scores_noir.append(score_noir)
+        scores_blanc.append(score_blanc)
+        temps_noir.append(joueur_noir.temps_exe)
+        temps_blanc.append(joueur_blanc.temps_exe)
+
+        if victoire == 1:
+            victoires_noir += 1
+        elif victoire == -1:
+            victoires_blanc += 1
+
+    return victoires_noir, victoires_blanc, scores_noir, scores_blanc, temps_noir, temps_blanc
+
+def Question_9():
+    total_victoires_noir = 0
+    total_victoires_blanc = 0
+    total_scores_noir = []
+    total_scores_blanc = []
+    total_temps_noir = []
+    total_temps_blanc = []
+
+    for profondeur in range(1, 4):
+        print(f"Profondeur {profondeur}:")
+        victoires_noir, victoires_blanc, scores_noir, scores_blanc, temps_noir, temps_blanc = simuler_parties(5, profondeur_noir=profondeur, profondeur_blanc=profondeur)
+        
+        print(f"Victoires Noir: {victoires_noir}, Victoires Blanc: {victoires_blanc}")
+        print(f"Score moyen Noir: {np.mean(scores_noir)}, Score moyen Blanc: {np.mean(scores_blanc)}")
+        print(f"Temps moyen de calcul Noir: {np.mean(temps_noir)} secondes, Temps moyen de calcul Blanc: {np.mean(temps_blanc)} secondes\n")
+        
+        total_victoires_noir += victoires_noir
+        total_victoires_blanc += victoires_blanc
+        total_scores_noir.extend(scores_noir)
+        total_scores_blanc.extend(scores_blanc)
+        total_temps_noir.extend(temps_noir)
+        total_temps_blanc.extend(temps_blanc)
+
+    print("\nRésultats finaux de toutes les parties jouées:")
+    print(f"Total Victoires Noir: {total_victoires_noir}, Total Victoires Blanc: {total_victoires_blanc}")
+    print(f"Score moyen Noir: {np.mean(total_scores_noir)}, Score moyen Blanc: {np.mean(total_scores_blanc)}")
+    print(f"Temps moyen de calcul Noir: {np.mean(total_temps_noir)} secondes, Temps moyen de calcul Blanc: {np.mean(total_temps_blanc)} secondes")
 
 
 """
-# Tester la fonction liste_coups_valides
-def test_liste_coups_valides():
-    plateau = Plateau()
-    coups_valides_noir = plateau.liste_coups_valides(1)
-    coups_valides_blanc = plateau.liste_coups_valides(-1)
-    print("Coups valides pour noir:", coups_valides_noir)
-    print("Coups valides pour blanc:", coups_valides_blanc)
-
-test_liste_coups_valides()
+12. Comparez les performances de temps avec Minmax, en faisant varier la profondeur maximale
 """
+def simuler_parties_alphabeta(n, profondeur_noir=3, profondeur_blanc=3, optimize=False):
+    victoires_noir = 0
+    victoires_blanc = 0
+    scores_noir = []
+    scores_blanc = []
+    temps_noir = []
+    temps_blanc = []
+
+    for i in range(n):
+        game = Jeu(opts={"choix_joueurs": False})
+
+        joueur_noir = AlphaBeta(game, "noir")
+        joueur_blanc = Random(game, "blanc")
+
+        game.noir = joueur_noir
+        game.blanc = joueur_blanc
+        game.joueur_courant = joueur_noir
+        game.partie_finie = False
+
+        while not game.partie_finie:
+            joueur = game.joueur_courant
+            if isinstance(joueur, AlphaBeta):
+                coup = joueur.demande_coup(profondeur_noir if joueur.couleur == "noir" else profondeur_blanc, optimize=optimize)
+            else:
+                coup = joueur.demande_coup()
+            game.jouer(coup)
+
+        [victoire, score_noir, score_blanc] = game.score()
+        scores_noir.append(score_noir)
+        scores_blanc.append(score_blanc)
+        temps_noir.append(joueur_noir.temps_exe)
+        temps_blanc.append(joueur_blanc.temps_exe)
+
+        if victoire == 1:
+            victoires_noir += 1
+        elif victoire == -1:
+            victoires_blanc += 1
+
+    return victoires_noir, victoires_blanc, scores_noir, scores_blanc, temps_noir, temps_blanc
+
+def comparer_alphabeta():
+    total_victoires_noir = 0
+    total_victoires_blanc = 0
+    total_scores_noir = []
+    total_scores_blanc = []
+    total_temps_noir = []
+    total_temps_blanc = []
+
+    for profondeur in range(1, 3):
+        print(f"Profondeur {profondeur} (AlphaBeta):")
+        victoires_noir, victoires_blanc, scores_noir, scores_blanc, temps_noir, temps_blanc = simuler_parties_alphabeta(5, profondeur_noir=profondeur, profondeur_blanc=profondeur, optimize=False)
+        
+        print(f"Victoires Noir: {victoires_noir}, Victoires Blanc: {victoires_blanc}")
+        print(f"Score moyen Noir: {np.mean(scores_noir)}, Score moyen Blanc: {np.mean(scores_blanc)}")
+        print(f"Temps moyen de calcul Noir: {np.mean(temps_noir)} secondes, Temps moyen de calcul Blanc: {np.mean(temps_blanc)} secondes\n")
+        
+        total_victoires_noir += victoires_noir
+        total_victoires_blanc += victoires_blanc
+        total_scores_noir.extend(scores_noir)
+        total_scores_blanc.extend(scores_blanc)
+        total_temps_noir.extend(temps_noir)
+        total_temps_blanc.extend(temps_blanc)
+
+    print("\nRésultats finaux de toutes les parties jouées (AlphaBeta):")
+    print(f"Total Victoires Noir: {total_victoires_noir}, Total Victoires Blanc: {total_victoires_blanc}")
+    print(f"Score moyen Noir: {np.mean(total_scores_noir)}, Score moyen Blanc: {np.mean(total_scores_blanc)}")
+    print(f"Temps moyen de calcul Noir: {np.mean(total_temps_noir)} secondes, Temps moyen de calcul Blanc: {np.mean(total_temps_blanc)} secondes")
+
+    total_victoires_noir_opt = 0
+    total_victoires_blanc_opt = 0
+    total_scores_noir_opt = []
+    total_scores_blanc_opt = []
+    total_temps_noir_opt = []
+    total_temps_blanc_opt = []
+
+    for profondeur in range(1, 3):
+        print(f"Profondeur {profondeur} (AlphaBeta Optimisé):")
+        victoires_noir_opt, victoires_blanc_opt, scores_noir_opt, scores_blanc_opt, temps_noir_opt, temps_blanc_opt = simuler_parties_alphabeta(5, profondeur_noir=profondeur, profondeur_blanc=profondeur, optimize=True)
+        
+        print(f"Victoires Noir: {victoires_noir_opt}, Victoires Blanc: {victoires_blanc_opt}")
+        print(f"Score moyen Noir: {np.mean(scores_noir_opt)}, Score moyen Blanc: {np.mean(scores_blanc_opt)}")
+        print(f"Temps moyen de calcul Noir: {np.mean(temps_noir_opt)} secondes, Temps moyen de calcul Blanc: {np.mean(temps_blanc_opt)} secondes\n")
+        
+        total_victoires_noir_opt += victoires_noir_opt
+        total_victoires_blanc_opt += victoires_blanc_opt
+        total_scores_noir_opt.extend(scores_noir_opt)
+        total_scores_blanc_opt.extend(scores_blanc_opt)
+        total_temps_noir_opt.extend(temps_noir_opt)
+        total_temps_blanc_opt.extend(temps_blanc_opt)
+
+    print("\nRésultats finaux de toutes les parties jouées (AlphaBeta Optimisé):")
+    print(f"Total Victoires Noir: {total_victoires_noir_opt}, Total Victoires Blanc: {total_victoires_blanc_opt}")
+    print(f"Score moyen Noir: {np.mean(total_scores_noir_opt)}, Score moyen Blanc: {np.mean(total_scores_blanc_opt)}")
+    print(f"Temps moyen de calcul Noir: {np.mean(total_temps_noir_opt)} secondes, Temps moyen de calcul Blanc: {np.mean(total_temps_blanc_opt)} secondes")
+
+if __name__ == "__main__":
+    #game = Jeu()
+    #game.demarrer()
+    comparer_alphabeta()
+
+
+
+
+
