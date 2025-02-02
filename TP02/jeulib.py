@@ -204,7 +204,6 @@ class Plateau:
 		return copie
 			
 
-
 """
 8. Tracez une courbe montrant comment les deux compteurs varient en fonction du choix de la
 profondeur maximale.
@@ -485,9 +484,9 @@ def comparer_alphabeta():
     print(f"Temps moyen de calcul Noir: {np.mean(total_temps_noir_opt)} secondes, Temps moyen de calcul Blanc: {np.mean(total_temps_blanc_opt)} secondes")
 
 if __name__ == "__main__":
-    #game = Jeu()
-    #game.demarrer()
-    comparer_alphabeta()
+    game = Jeu()
+    game.demarrer()
+    #comparer_alphabeta()
 
 
 

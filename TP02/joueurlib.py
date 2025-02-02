@@ -101,7 +101,7 @@ class Minmax(IA):
 			self.temps_exe += end_time - start_time
 
 			print(f"Temps d'exécution minmax : {self.temps_exe:.2f} secondes")
-			#print(f"Nombre d'appels à jouer : {self.nb_jouer()}")
+			print(f"Nombre d'appels à jouer : {self.nb_jouer()}")
 			#print(f"Meilleur coup : {meilleur_coup}")
 			return meilleur_coup if meilleur_coup is not None else []
 
